@@ -22,9 +22,9 @@ body{
 }
 body.noscroll{overflow:hidden}
 .wrap{max-width:540px; margin:0 auto; padding:14px 14px 60px}
-.top{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px}
-.top h1{font-size:21px; margin:0; letter-spacing:.5px}
-.top .nav{display:flex; gap:8px}
+.top{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.top h1{font-size:19px; margin:0; letter-spacing:.5px}
+.top .nav{display:flex; gap:6px}
 .card{
   background:var(--card); border:2.5px solid var(--line); border-radius:var(--wob);
   box-shadow:4px 5px 0 rgba(122,100,88,.22); padding:16px; margin-bottom:16px;
@@ -38,11 +38,19 @@ body.noscroll{overflow:hidden}
 .btn:active{transform:translate(2px,3px); box-shadow:0 0 0 rgba(0,0,0,0)}
 .btn:focus-visible,.x:focus-visible,input:focus-visible{outline:3px solid #7fb4d6; outline-offset:2px}
 .btn:disabled{opacity:.55; cursor:not-allowed; background:#e9e2d6; box-shadow:none; transform:none}
-.btn.small{padding:6px 12px; min-height:44px; font-size:14px}
+.btn.small{padding:6px 10px; min-height:44px; font-size:14px}
 .btn.green{background:var(--green)}
 .btn.pink{background:var(--pink)}
 .btn.blue{background:var(--blue)}
 .btn.block{width:100%}
+/* guide */
+.gbody{min-height:190px; font-size:15px}
+.gbody p{margin:10px 0}
+.glist{margin:10px 0 0; padding-left:20px}
+.glist li{margin:8px 0}
+.dots{display:flex; justify-content:center; gap:7px; margin:12px 0 2px}
+.dots i{width:10px; height:10px; border-radius:50%; border:2px solid var(--line); background:#fff}
+.dots i.on{background:var(--green)}
 
 /* plant card */
 .figure{position:relative; width:min(250px,72%); margin:0 auto 6px}
@@ -147,6 +155,7 @@ input[type=text]{
   <header class="top">
     <h1>🌱 Focus Bonsai</h1>
     <div class="nav">
+      <button id="btnGuide" class="btn small" aria-label="開啟遊玩指南">❓ 指南</button>
       <button id="btnBook" class="btn small" aria-label="開啟植物圖鑑">📖 圖鑑</button>
       <button id="btnBackup" class="btn small" aria-label="開啟備份與還原">⚙️ 備份</button>
     </div>
@@ -163,7 +172,7 @@ input[type=text]{
 
 /* ================= 常數與資料 ================= */
 const KEY='focus_bonsai_v2';
-const VERSION='2.1';
+const VERSION='2.2';
 const DAILY_CAP=3, DROPS_PER_BAG=12, TASK_COUNT=5, MATURE_POINTS=30, MATURE_FERT=2;
 const STAGE_NAMES=['種子破土','幼苗雙葉','分枝小灌木','茂密含苞','盛開成熟'];
 const IDS=['sunflower','lily','blueberry','poinsettia','orange_jessamine'];
@@ -193,7 +202,7 @@ let startupToast=null;
 function defaultState(){
   const enc={};IDS.forEach(k=>enc[k]={unlocked:false,unlockedAt:null});
   return {
-    version:VERSION, meta:{allCollectedShown:false}, currentPlant:null, lastTasks:[],
+    version:VERSION, meta:{allCollectedShown:false,guideSeen:false}, currentPlant:null, lastTasks:[],
     todayRecord:{dateString:dateStr(),completedTaskIds:[],waterCount:0},
     fertilizerInventory:{progressDrops:0,availableBags:0}, encyclopedia:enc
   };
@@ -214,6 +223,7 @@ function normalize(raw){
   if(!inv||!isNat(inv.progressDrops)||!isNat(inv.availableBags)) throw new Error('肥料資料缺少或格式錯誤');
   out.fertilizerInventory={progressDrops:inv.progressDrops%DROPS_PER_BAG,availableBags:inv.availableBags+Math.floor(inv.progressDrops/DROPS_PER_BAG)};
   out.meta.allCollectedShown=!!(raw.meta&&raw.meta.allCollectedShown);
+  out.meta.guideSeen=!!(raw.meta&&raw.meta.guideSeen);
   out.lastTasks=Array.isArray(raw.lastTasks)?raw.lastTasks.filter(t=>typeof t==='string').slice(0,TASK_COUNT):[];
   const tr=raw.todayRecord;
   if(tr&&isDate(tr.dateString)&&Array.isArray(tr.completedTaskIds)){
@@ -601,7 +611,7 @@ function openModal(inner,opts){
     (dismiss?'<button class="x" data-m="close" aria-label="關閉">✕</button>':'')+inner+'</div></div>';
   modal={dismissable:dismiss,onClose:opts.onClose||null,last:last};
   const m=root.querySelector('.modal');
-  const f=m.querySelector('input')||m.querySelector('.btn:not([disabled])')||m;
+  const f=m.querySelector('[data-af]')||m.querySelector('input')||m.querySelector('.btn:not([disabled])')||m;
   f.focus();
   document.body.classList.add('noscroll');
 }
@@ -616,6 +626,10 @@ function closeModal(silent){
 document.addEventListener('keydown',e=>{
   if(!modal) return;
   if(e.key==='Escape'&&modal.dismissable){e.preventDefault();closeModal();return;}
+  if(guide){
+    if(e.key==='ArrowRight'&&guide.i<GUIDE.length-1){e.preventDefault();guide.i++;renderGuide();return;}
+    if(e.key==='ArrowLeft'&&guide.i>0){e.preventDefault();guide.i--;renderGuide();return;}
+  }
   if(e.key==='Tab'){
     const m=$('#modalRoot .modal');if(!m) return;
     const list=[].filter.call(m.querySelectorAll('button,input,[href]'),el=>!el.disabled&&el.offsetParent!==null);
@@ -643,6 +657,32 @@ function showAllCollected(){
     '<p class="center">你已經集齊 5 款植物，真的太厲害了！</p><p class="center note">之後的種子將從 5 款中完全隨機抽取，繼續享受養成的樂趣吧。</p>'+
     '<div class="row"><button class="btn yellow" style="background:var(--yellow)" data-m="close">繼續前進</button></div>');
   confetti();
+}
+
+/* ---- 遊玩指南 ---- */
+const GUIDE=[
+  {t:'🌱 歡迎來到專注盆栽',p:['這是一個把小習慣養成植物的小遊戲。','你每天完成自己設定的小任務，就能幫植物澆水，把它從種子養到盛開，並收集 5 款植物圖鑑。','資料只存在這個瀏覽器裡，不需要註冊。']},
+  {t:'💧 每天怎麼玩',l:['種下種子時，設定 5 個每日任務，種植期間不能修改任務。','做完一個任務，就按它旁邊的「澆水」。','每天最多澆 3 次，每個任務一天只能澆 1 次。','午夜 12 點換日，隔天可以重新澆水。']},
+  {t:'🧴 肥料與成長',l:['每澆水 12 次，可以獲得 1 包肥料，肥料會保留到下一株。','施肥需要自己按按鈕，每包讓成長值 +3。','成長值 30 以上，而且至少施肥 2 次，植物才會盛開成熟。','只有成長值夠但肥料不足時，植物會停在「茂密含苞」，等你補施肥。']},
+  {t:'🍂 小心別讓它渴死',l:['一天只要澆水 1 次，就算有照顧到，不用澆滿 3 次。','有 1 整天完全沒澆水，隔天植物會枯黃，澆一次水就能恢復。','連續 3 天都沒澆水，過午夜植物就會枯萎。','枯萎的植物不會進圖鑑，清理花盆後會重新抽一顆種子。']},
+  {t:'📖 收集圖鑑',l:['植物成熟後會解鎖圖鑑，記下解鎖日期。','抽種子時會優先抽到還沒收集的植物。','植物全收集後，就會改為隨機抽取，繼續養著玩。','建議偶爾到「⚙️ 備份」匯出存檔，換瀏覽器或手機時才不會遺失。']}
+];
+let guide=null;
+function showGuide(){guide={i:0};renderGuide();}
+function renderGuide(){
+  const n=GUIDE.length,i=guide.i,g=GUIDE[i],last=i===n-1;
+  const body=g.p?g.p.map(x=>'<p>'+esc(x)+'</p>').join(''):'<ul class="glist">'+g.l.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+  let dots='';for(let k=0;k<n;k++) dots+='<i class="'+(k===i?'on':'')+'"></i>';
+  openModal('<h2 id="mTitle">'+esc(g.t)+'</h2><div class="gbody">'+body+'</div>'+
+    '<div class="dots" role="img" aria-label="第 '+(i+1)+' 頁，共 '+n+' 頁">'+dots+'</div>'+
+    '<div class="row">'+(i>0?'<button class="btn" data-m="gprev" aria-label="上一頁">上一頁</button>':'')+
+    (last?'<button class="btn green" data-m="close" data-af aria-label="開始玩">開始玩</button>':'<button class="btn green" data-m="gnext" data-af aria-label="下一頁">下一頁</button>')+'</div>',
+    {onClose:guideClosed});
+}
+function guideClosed(){
+  guide=null;
+  if(!S.meta.guideSeen){S.meta.guideSeen=true;save();}
+  if(!S.currentPlant&&!setup) startSetup();
 }
 
 /* ---- 圖鑑 ---- */
@@ -761,6 +801,7 @@ function startPlanting(){
 }
 
 /* ================= 事件 ================= */
+$('#btnGuide').addEventListener('click',showGuide);
 $('#btnBook').addEventListener('click',showBook);
 $('#btnBackup').addEventListener('click',()=>showBackup());
 
@@ -779,6 +820,8 @@ mr.addEventListener('click',e=>{
   const b=e.target.closest('[data-m]');if(!b||b.disabled) return;
   switch(b.getAttribute('data-m')){
     case 'close': closeModal(); break;
+    case 'gprev': if(guide&&guide.i>0){guide.i--;renderGuide();} break;
+    case 'gnext': if(guide&&guide.i<GUIDE.length-1){guide.i++;renderGuide();} break;
     case 'draw': doDraw(); break;
     case 'toName': setup.step='name'; renderSetup(); break;
     case 'toTasks': setup.step='tasks'; renderSetup(); break;
@@ -816,10 +859,11 @@ S=load();
 tick();
 render();
 if(startupToast) toast(startupToast);
-if(!S.currentPlant) startSetup();
+if(!S.meta.guideSeen) showGuide();
+else if(!S.currentPlant) startSetup();
 
 /* 測試用掛鉤（不影響使用） */
-window.__bonsai={get state(){return S;},tick,water,fertilize,stageOf,healthOf,normalize,render};
+window.__bonsai={showGuide,get state(){return S;},tick,water,fertilize,stageOf,healthOf,normalize,render};
 })();
 </script>
 </body>
