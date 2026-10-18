@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf3e4">
+<title>專注盆栽 Focus Bonsai</title>
+<style>
+:root{
+  --bg:#fbf3e4; --card:#fffaf0; --ink:#5b4a40; --soft:#8c7a6e; --line:#7a6458;
+  --green:#a9d58f; --green-d:#6fa35e; --pink:#f7bcae; --blue:#bfe2ee; --yellow:#f8e29f; --sand:#efe3cc;
+  --wob:22px 28px 20px 30px / 28px 20px 30px 22px;
+  --wob2:16px 22px 14px 24px / 22px 14px 24px 16px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; min-height:100vh; color:var(--ink); background-color:var(--bg);
+  background-image:radial-gradient(#efe0c3 1.6px, transparent 1.6px); background-size:24px 24px;
+  font-family:"PingFang TC","Hiragino Maru Gothic ProN","Noto Sans TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;
+  line-height:1.55; padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+body.noscroll{overflow:hidden}
+.wrap{max-width:540px; margin:0 auto; padding:14px 14px 60px}
+.top{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px}
+.top h1{font-size:21px; margin:0; letter-spacing:.5px}
+.top .nav{display:flex; gap:8px}
+.card{
+  background:var(--card); border:2.5px solid var(--line); border-radius:var(--wob);
+  box-shadow:4px 5px 0 rgba(122,100,88,.22); padding:16px; margin-bottom:16px;
+}
+.btn{
+  font:inherit; font-weight:600; color:var(--ink); background:var(--yellow);
+  border:2.5px solid var(--line); border-radius:var(--wob2); padding:9px 16px; min-height:44px;
+  cursor:pointer; box-shadow:2px 3px 0 rgba(122,100,88,.3); transition:transform .08s, box-shadow .08s;
+}
+.btn:hover{filter:brightness(1.03)}
+.btn:active{transform:translate(2px,3px); box-shadow:0 0 0 rgba(0,0,0,0)}
+.btn:focus-visible,.x:focus-visible,input:focus-visible{outline:3px solid #7fb4d6; outline-offset:2px}
+.btn:disabled{opacity:.55; cursor:not-allowed; background:#e9e2d6; box-shadow:none; transform:none}
+.btn.small{padding:6px 12px; min-height:44px; font-size:14px}
+.btn.green{background:var(--green)}
+.btn.pink{background:var(--pink)}
+.btn.blue{background:var(--blue)}
+.btn.block{width:100%}
+
+/* plant card */
+.figure{position:relative; width:min(250px,72%); margin:0 auto 6px}
+.figure svg{width:100%; height:auto; display:block; overflow:visible}
+.badge{
+  position:absolute; right:-6px; top:2px; font-size:13px; font-weight:700; padding:3px 10px;
+  border:2px solid var(--line); border-radius:14px 18px 12px 18px; background:var(--green);
+}
+.badge.thirsty{background:#f3d27a} .badge.dead{background:#d8d2c8} .badge.mature{background:var(--pink)}
+.plantname{font-size:18px; font-weight:700; text-align:center; margin:4px 0 2px}
+.sub{font-size:14px; color:var(--soft); text-align:center; margin:2px 0}
+.bar{height:16px; border:2.5px solid var(--line); border-radius:12px; background:var(--sand); overflow:hidden; margin:10px 4px 4px}
+.bar>i{display:block; height:100%; background:linear-gradient(90deg,#b8e0a0,#8fcb78); border-right:2.5px solid var(--line); transition:width .5s}
+.bar-label{font-size:13px; text-align:center; color:var(--soft)}
+.hint{margin:10px 0 0; padding:8px 12px; border:2px dashed var(--line); border-radius:var(--wob2); font-size:14px; text-align:center; background:#fff3d6}
+.hint.warn{background:#fdebd0}
+.hint.bad{background:#ece6dd}
+.ferti{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; padding-top:12px; border-top:2px dashed #d8c7a9}
+.ferti .info{font-size:14px}
+.pips{display:flex; gap:3px; margin-top:5px; flex-wrap:wrap}
+.pips b{width:10px; height:10px; border-radius:50%; border:2px solid var(--line); background:#fff}
+.pips b.on{background:var(--blue)}
+
+/* tasks */
+.panel h2{font-size:17px; margin:0 0 10px; display:flex; justify-content:space-between; align-items:center; gap:8px}
+.drops{font-size:15px}
+.task{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:2px dotted #dccdb3}
+.task:last-of-type{border-bottom:0}
+.task .chk{width:26px; height:26px; flex:none; border:2.5px solid var(--line); border-radius:9px 11px 8px 12px; display:grid; place-items:center; background:#fff; font-weight:900; color:var(--green-d)}
+.task.done .chk{background:var(--green)}
+.task .txt{flex:1; word-break:break-word}
+.task.done .txt{color:var(--soft); text-decoration:line-through; text-decoration-color:#b9a58f}
+.task .done-tag{font-size:13px; color:var(--green-d); font-weight:700; white-space:nowrap}
+.full{margin:10px 0 0; text-align:center; font-weight:700; color:#4f8fb0; font-size:14px}
+.lock{margin:10px 0 0; text-align:center; font-size:13px; color:var(--soft)}
+.center{text-align:center}
+.center p{margin:6px 0 12px}
+
+/* modal */
+.overlay{position:fixed; inset:0; background:rgba(91,74,64,.45); display:grid; place-items:center; padding:16px; z-index:50; overflow:auto; animation:fade .2s}
+.modal{position:relative; width:min(460px,100%); max-height:92vh; overflow:auto; margin:0; animation:pop .25s}
+.modal h2{margin:0 0 10px; font-size:20px; text-align:center}
+.modal p{margin:8px 0}
+.x{position:absolute; right:10px; top:10px; width:44px; height:44px; font-size:18px; border:0; background:transparent; cursor:pointer; color:var(--soft)}
+.seedbox{font-size:64px; text-align:center; margin:10px 0 4px; min-height:92px; display:grid; place-items:center}
+.seedbox.shake{animation:shake .25s infinite}
+.pname{font-size:20px; font-weight:700; text-align:center}
+.field{display:block; margin:10px 0}
+.field span{display:block; font-size:14px; color:var(--soft); margin-bottom:4px}
+input[type=text]{
+  width:100%; font:inherit; color:var(--ink); padding:10px 12px; min-height:44px; background:#fff;
+  border:2.5px solid var(--line); border-radius:var(--wob2);
+}
+.err{color:#b4423a; font-size:14px; font-weight:600; min-height:20px; margin:4px 0}
+.row{display:flex; gap:10px; margin-top:12px}
+.row .btn{flex:1}
+.grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:12px}
+.grid .item{border:2.5px solid var(--line); border-radius:var(--wob2); padding:8px; text-align:center; background:#fff}
+.grid .item.locked svg{filter:brightness(.18) contrast(1.1); opacity:.55}
+.grid .item .q{position:absolute; inset:0; display:grid; place-items:center; font-size:46px; font-weight:800; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.grid .item .fig{position:relative}
+.grid .item .nm{font-weight:700; margin-top:4px}
+.grid .item .dt{font-size:12px; color:var(--soft)}
+.grid .item:last-child:nth-child(odd){grid-column:1/-1; max-width:50%; margin:0 auto; width:100%}
+.big-fig{width:min(210px,70%); margin:0 auto}
+.big-fig svg{width:100%; height:auto; display:block; overflow:visible}
+.note{font-size:13px; color:var(--soft)}
+
+/* effects */
+.drop{position:absolute; top:6%; font-size:22px; pointer-events:none; animation:drop 1s ease-in forwards}
+#toast{position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:90; display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none; width:min(92vw,420px)}
+#toast div{background:var(--ink); color:#fff8ea; padding:9px 16px; border-radius:var(--wob2); font-size:14px; text-align:center; animation:pop .25s; box-shadow:0 3px 8px rgba(0,0,0,.2)}
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:80; overflow:hidden}
+#confetti i{position:absolute; top:-14px; width:10px; height:14px; border-radius:3px; animation:fall linear forwards}
+.sway{animation:sway 5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+@keyframes drop{0%{transform:translateY(-10px); opacity:0}25%{opacity:1}100%{transform:translateY(120px); opacity:0}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{transform:scale(.92); opacity:0}to{transform:scale(1); opacity:1}}
+@keyframes shake{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" filterUnits="userSpaceOnUse" x="-30" y="-30" width="260" height="290">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="wilt" filterUnits="userSpaceOnUse" x="-30" y="-30" width="260" height="290">
+      <feColorMatrix type="matrix" values=".6 .35 .1 0 .08  .45 .45 .1 0 .04  .2 .3 .1 0 0  0 0 0 1 0"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <h1>🌱 Focus Bonsai</h1>
+    <div class="nav">
+      <button id="btnBook" class="btn small" aria-label="開啟植物圖鑑">📖 圖鑑</button>
+      <button id="btnBackup" class="btn small" aria-label="開啟備份與還原">⚙️ 備份</button>
+    </div>
+  </header>
+  <main id="app"></main>
+</div>
+<div id="modalRoot"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="confetti" aria-hidden="true"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= 常數與資料 ================= */
+const KEY='focus_bonsai_v2';
+const VERSION='2.1';
+const DAILY_CAP=3, DROPS_PER_BAG=12, TASK_COUNT=5, MATURE_POINTS=30, MATURE_FERT=2;
+const STAGE_NAMES=['種子破土','幼苗雙葉','分枝小灌木','茂密含苞','盛開成熟'];
+const IDS=['sunflower','lily','blueberry','poinsettia','orange_jessamine'];
+const PLANTS={
+  sunflower:{name:'向日葵',emoji:'🌻',leaf:'#a6d48a'},
+  lily:{name:'百合花',emoji:'🌸',leaf:'#9fd1a0'},
+  blueberry:{name:'藍莓',emoji:'🫐',leaf:'#8fc592'},
+  poinsettia:{name:'聖誕紅',emoji:'🎄',leaf:'#8cc08a'},
+  orange_jessamine:{name:'七里香',emoji:'🌼',leaf:'#7fb986'}
+};
+
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const reduceMotion=()=>!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const pad=n=>String(n).padStart(2,'0');
+function dateStr(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function dayNum(s){const a=s.split('-').map(Number);return Math.round(Date.UTC(a[0],a[1]-1,a[2])/86400000);}
+const isDate=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s);
+const isNat=n=>Number.isInteger(n)&&n>=0;
+
+/* ================= 狀態 ================= */
+let S=null;
+let storageWarned=false;
+let startupToast=null;
+
+function defaultState(){
+  const enc={};IDS.forEach(k=>enc[k]={unlocked:false,unlockedAt:null});
+  return {
+    version:VERSION, meta:{allCollectedShown:false}, currentPlant:null, lastTasks:[],
+    todayRecord:{dateString:dateStr(),completedTaskIds:[],waterCount:0},
+    fertilizerInventory:{progressDrops:0,availableBags:0}, encyclopedia:enc
+  };
+}
+
+function normalize(raw){
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)) throw new Error('檔案內容不是有效的備份格式');
+  if(typeof raw.version!=='string'||!/^2\./.test(raw.version)) throw new Error('不支援的版本（'+(raw.version||'未知')+'），僅支援 2.x');
+  const out=defaultState();
+  const enc=raw.encyclopedia;
+  if(!enc||typeof enc!=='object') throw new Error('缺少圖鑑資料');
+  IDS.forEach(k=>{
+    const e=enc[k];
+    if(!e||typeof e.unlocked!=='boolean') throw new Error('圖鑑資料缺少「'+PLANTS[k].name+'」或格式錯誤');
+    out.encyclopedia[k]={unlocked:e.unlocked,unlockedAt:e.unlocked?(isDate(e.unlockedAt)?e.unlockedAt:dateStr()):null};
+  });
+  const inv=raw.fertilizerInventory;
+  if(!inv||!isNat(inv.progressDrops)||!isNat(inv.availableBags)) throw new Error('肥料資料缺少或格式錯誤');
+  out.fertilizerInventory={progressDrops:inv.progressDrops%DROPS_PER_BAG,availableBags:inv.availableBags+Math.floor(inv.progressDrops/DROPS_PER_BAG)};
+  out.meta.allCollectedShown=!!(raw.meta&&raw.meta.allCollectedShown);
+  out.lastTasks=Array.isArray(raw.lastTasks)?raw.lastTasks.filter(t=>typeof t==='string').slice(0,TASK_COUNT):[];
+  const tr=raw.todayRecord;
+  if(tr&&isDate(tr.dateString)&&Array.isArray(tr.completedTaskIds)){
+    const ids=tr.completedTaskIds.filter(x=>typeof x==='string');
+    out.todayRecord={dateString:tr.dateString,completedTaskIds:ids,waterCount:isNat(tr.waterCount)?tr.waterCount:ids.length};
+  }
+  const p=raw.currentPlant;
+  if(p!==null&&p!==undefined){
+    if(typeof p!=='object'||!PLANTS[p.plantId]) throw new Error('目前植物資料無效');
+    let status=p.status;
+    if(status==='HEALTHY'||status==='THIRSTY') status='GROWING';
+    if(!['GROWING','MATURE','DEAD'].includes(status)) throw new Error('植物狀態無效');
+    if(!Array.isArray(p.tasks)||p.tasks.length!==TASK_COUNT||p.tasks.some(t=>!t||typeof t.text!=='string'||typeof t.id!=='string')) throw new Error('任務資料不完整（需要 5 個任務）');
+    if(!isNat(p.fertilizedCount)) throw new Error('施肥次數格式錯誤');
+    let last=p.lastWateredDate;
+    if(!isDate(last)&&isNat(p.lastWateredTimestamp)) last=dateStr(new Date(p.lastWateredTimestamp));
+    if(!isDate(last)) throw new Error('缺少最後澆水日期');
+    const planted=isDate(p.plantedDate)?p.plantedDate:last;
+    const watering=isNat(p.wateringCount)?p.wateringCount:Math.max(0,(Number(p.growthPoints)||0)-p.fertilizedCount*3);
+    let tasks=p.tasks.map(t=>({id:t.id,text:t.text}));
+    if(new Set(tasks.map(t=>t.id)).size!==TASK_COUNT) tasks=tasks.map((t,i)=>({id:'t'+(i+1),text:t.text}));
+    out.currentPlant={
+      plantId:p.plantId,
+      nickname:(typeof p.nickname==='string'&&p.nickname.trim())?p.nickname.trim().slice(0,12):PLANTS[p.plantId].name,
+      plantedDate:planted, growthPoints:0, wateringCount:watering, fertilizedCount:p.fertilizedCount,
+      lastWateredDate:last, status:status, tasks:tasks
+    };
+    recalc(out.currentPlant);
+    const valid=new Set(tasks.map(t=>t.id));
+    out.todayRecord.completedTaskIds=out.todayRecord.completedTaskIds.filter(id=>valid.has(id));
+  }
+  return out;
+}
+
+function load(){
+  let raw=null;
+  try{raw=localStorage.getItem(KEY);}catch(e){}
+  if(!raw) return defaultState();
+  try{return normalize(JSON.parse(raw));}
+  catch(e){
+    try{localStorage.setItem(KEY+'_corrupt',raw);}catch(_){}
+    startupToast='存檔格式異常，已改用全新資料（舊資料已另存備份）';
+    return defaultState();
+  }
+}
+
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));}
+  catch(e){
+    if(!storageWarned){storageWarned=true;toast('⚠️ 無法寫入瀏覽器儲存空間，目前資料只存在記憶體，請記得備份');}
+  }
+}
+
+/* ================= 遊戲邏輯 ================= */
+function recalc(p){p.growthPoints=p.wateringCount+p.fertilizedCount*3;}
+function stageOf(p){
+  if(p.status==='MATURE') return 5;
+  const g=p.growthPoints;
+  if(g>=MATURE_POINTS&&p.fertilizedCount>=MATURE_FERT) return 5;
+  if(g>=19) return 4;
+  if(g>=10) return 3;
+  if(g>=4) return 2;
+  return 1;
+}
+function missedDays(p){
+  const since=dayNum(S.todayRecord.dateString)-dayNum(p.lastWateredDate);
+  return Math.max(0,since-1);
+}
+function healthOf(p){
+  if(p.status==='DEAD') return 'DEAD';
+  if(p.status==='MATURE') return 'MATURE';
+  const m=missedDays(p);
+  if(m>=3) return 'DEAD';
+  return m>=1?'THIRSTY':'HEALTHY';
+}
+
+/* 換日與死亡檢查；有變動回傳 true */
+function tick(){
+  let changed=false;
+  const t=dateStr();
+  if(S.todayRecord.dateString!==t){
+    S.todayRecord={dateString:t,completedTaskIds:[],waterCount:0};
+    changed=true;
+  }
+  const p=S.currentPlant;
+  if(p&&p.status==='GROWING'&&missedDays(p)>=3){p.status='DEAD';changed=true;}
+  if(changed) save();
+  return changed;
+}
+
+function afterGrowth(before,kind,gained){
+  const p=S.currentPlant;
+  const msgs=[];
+  const after=stageOf(p);
+  if(after===5){
+    p.status='MATURE';
+    const e=S.encyclopedia[p.plantId];
+    const first=!e.unlocked;
+    if(first){e.unlocked=true;e.unlockedAt=S.todayRecord.dateString;}
+    let showAll=false;
+    if(IDS.every(k=>S.encyclopedia[k].unlocked)&&!S.meta.allCollectedShown){S.meta.allCollectedShown=true;showAll=true;}
+    save();render();
+    showMature(first,showAll);
+    return;
+  }
+  save();render();
+  if(kind==='water') dropAnim();
+  if(gained) msgs.push('🧴 獲得 1 包肥料！');
+  if(after>before) msgs.push('🎉 成長了！進入 Stage '+after+'：'+STAGE_NAMES[after-1]);
+  msgs.forEach(m=>toast(m));
+}
+
+function water(id){
+  tick();
+  const p=S.currentPlant;
+  if(!p||p.status!=='GROWING'){render();return;}
+  const rec=S.todayRecord;
+  if(rec.waterCount>=DAILY_CAP||rec.completedTaskIds.includes(id)||!p.tasks.some(t=>t.id===id)){render();return;}
+  const before=stageOf(p);
+  rec.completedTaskIds.push(id);
+  rec.waterCount++;
+  p.wateringCount++;
+  recalc(p);
+  p.lastWateredDate=rec.dateString;
+  const inv=S.fertilizerInventory;
+  inv.progressDrops++;
+  let gained=0;
+  while(inv.progressDrops>=DROPS_PER_BAG){inv.progressDrops-=DROPS_PER_BAG;inv.availableBags++;gained++;}
+  afterGrowth(before,'water',gained);
+}
+
+function fertilize(){
+  tick();
+  const p=S.currentPlant,inv=S.fertilizerInventory;
+  if(!p||p.status!=='GROWING'||inv.availableBags<1){render();return;}
+  const before=stageOf(p);
+  inv.availableBags--;
+  p.fertilizedCount++;
+  recalc(p);
+  afterGrowth(before,'fertilize',0);
+  if(S.currentPlant&&S.currentPlant.status==='GROWING') toast('🧴 施肥完成，成長值 +3');
+}
+
+function leavePlant(){
+  S.currentPlant=null;
+  save();render();
+  startSetup();
+}
+
+/* ================= 植物 SVG ================= */
+function leaf(x,y,ang,len,fill){
+  const w=len*0.42;
+  return '<g transform="translate('+x+' '+y+') rotate('+ang+')"><path d="M0 0 C'+(len*.3)+' '+(-w)+' '+(len*.75)+' '+(-w*.8)+' '+len+' 0 C'+(len*.75)+' '+(w*.8)+' '+(len*.3)+' '+w+' 0 0Z" fill="'+fill+'" stroke="#5e8458" stroke-width="2" stroke-linejoin="round"/><path d="M2 0 L'+(len*.78)+' 0" stroke="#5e8458" stroke-width="1.2" opacity=".5" fill="none"/></g>';
+}
+function stem(x1,y1,x2,y2,w){
+  const cx=(x1+x2)/2+(x2>x1?-5:(x2<x1?5:3)),cy=(y1+y2)/2;
+  return '<path d="M'+x1+' '+y1+' Q'+cx+' '+cy+' '+x2+' '+y2+'" stroke="#6f9a60" stroke-width="'+w+'" fill="none" stroke-linecap="round"/>';
+}
+function petals(x,y,n,len,wid,fill,stroke,rot){
+  let o='';rot=rot||0;
+  for(let i=0;i<n;i++){
+    o+='<ellipse cx="0" cy="'+(-len/2)+'" rx="'+wid+'" ry="'+(len/2)+'" transform="translate('+x+' '+y+') rotate('+(rot+i*360/n)+')" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.6"/>';
+  }
+  return o;
+}
+function berry(cx,cy,r,fill,stroke,crown){
+  return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.8"/>'+
+    (crown?'<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*.25)+'" fill="'+stroke+'"/><circle cx="'+(cx-r*.35)+'" cy="'+(cy-r*.35)+'" r="'+(r*.2)+'" fill="#fff" opacity=".75"/>':'');
+}
+
+function decor(id,st,sc){
+  let s='';
+  switch(id){
+  case 'sunflower':
+    if(st===3){s='<circle r="6" fill="#a8d48a" stroke="#5e8458" stroke-width="2"/><circle cy="-3" r="2" fill="#f7d154"/>';}
+    else if(st===4){s=petals(0,0,10,19,4,'#f7d154','#c9932f')+'<circle r="10" fill="#a8d48a" stroke="#5e8458" stroke-width="2"/>';}
+    else{
+      s=petals(0,0,14,31,7,'#f7d154','#c9932f')+petals(0,0,14,25,5.5,'#fbe57f','#d9a73a',12.8)+
+        '<circle r="13" fill="#8a5a3c" stroke="#5a3a26" stroke-width="2"/>';
+      for(let i=0;i<9;i++){const a=i*137.5*Math.PI/180,r=2+i*1.1;s+='<circle cx="'+(Math.cos(a)*r).toFixed(1)+'" cy="'+(Math.sin(a)*r).toFixed(1)+'" r="1.2" fill="#5a3a26"/>';}
+    }
+    break;
+  case 'lily':
+    if(st===3){s='<ellipse cy="-4" rx="3.5" ry="8" fill="#bfe0a8" stroke="#5e8458" stroke-width="1.8"/>';}
+    else if(st===4){s='<g transform="rotate(12)"><ellipse cy="-9" rx="6" ry="14" fill="#fde7e3" stroke="#d98a9a" stroke-width="1.8"/><path d="M0 -22 Q-2 -10 0 0" stroke="#e8a3ad" stroke-width="1.4" fill="none"/><path d="M-6 0 Q0 6 6 0" fill="#bfe0a8" stroke="#5e8458" stroke-width="1.6"/></g>';}
+    else{
+      s=petals(0,0,6,25,6.8,'#fff3f0','#d98a9a',30);
+      for(let i=0;i<6;i++){s+='<path d="M0 0 L0 -17" transform="rotate('+(30+i*60)+')" stroke="#f0b3bd" stroke-width="1.4" stroke-linecap="round"/>';}
+      for(let i=0;i<5;i++){const a=(i*72+10)*Math.PI/180;const x=Math.sin(a)*10,y=-Math.cos(a)*10;
+        s+='<line x1="0" y1="0" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e8a23a" stroke-width="1.5"/><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2.2" fill="#e8923a"/>';}
+      s+='<circle r="3" fill="#bfe0a8" stroke="#5e8458" stroke-width="1.2"/>';
+    }
+    break;
+  case 'blueberry':
+    if(st===3){s='<circle cx="-4" cy="2" r="3.6" fill="#fff" stroke="#9fb0c4" stroke-width="1.6"/><circle cx="4" cy="-1" r="3.6" fill="#fff" stroke="#9fb0c4" stroke-width="1.6"/><circle cx="0" cy="6" r="3" fill="#fff" stroke="#9fb0c4" stroke-width="1.6"/>';}
+    else if(st===4){s=berry(-7,3,5.5,'#bcd9a2','#6f9a60')+berry(6,2,5.5,'#d6c3d6','#8f7aa0')+berry(0,-6,5.5,'#bcd9a2','#6f9a60')+berry(-1,10,5,'#c9d9ee','#7d93b8');}
+    else{s=berry(-9,4,8,'#7289cf','#3e4f8e',1)+berry(8,3,8,'#6a82c9','#3e4f8e',1)+berry(0,-8,8,'#7a90d4','#3e4f8e',1)+berry(-2,13,7,'#6f86cc','#3e4f8e',1);}
+    break;
+  case 'poinsettia':
+    if(st===3){s='<circle r="4.5" fill="#bfe0a8" stroke="#5e8458" stroke-width="1.8"/><circle cy="-2" r="2" fill="#e98a7e"/>';}
+    else if(st===4){s=petals(0,0,6,14,4.5,'#e69a86','#b5533f')+'<circle r="3.5" fill="#d9e69a" stroke="#8da24f" stroke-width="1.4"/>';}
+    else{
+      s=petals(0,0,8,27,8,'#e2565a','#a62f33')+petals(0,0,8,18,6,'#f06d69','#b83a3d',22.5)+'<circle r="6" fill="#f6dd6a" stroke="#c9a33a" stroke-width="1.6"/>';
+      [[-2,-2],[2,-1],[0,2],[-3,2],[3,3]].forEach(a=>{s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="1.2" fill="#d99a2c"/>';});
+    }
+    break;
+  case 'orange_jessamine':
+    if(st===3){s='<circle cx="-3" cy="1" r="3.2" fill="#d6e8c0" stroke="#6f9a60" stroke-width="1.5"/><circle cx="4" cy="-2" r="3.2" fill="#d6e8c0" stroke="#6f9a60" stroke-width="1.5"/>';}
+    else if(st===4){s='<circle cx="-4" cy="2" r="4.6" fill="#fffdf5" stroke="#b9b196" stroke-width="1.6"/><circle cx="5" cy="-2" r="4.6" fill="#fffdf5" stroke="#b9b196" stroke-width="1.6"/><circle cx="1" cy="8" r="3.8" fill="#fffdf5" stroke="#b9b196" stroke-width="1.6"/>';}
+    else{
+      const fl=(x,y,k)=>'<g transform="translate('+x+' '+y+') scale('+k+')">'+petals(0,0,5,12,4.8,'#fffef9','#b9b196')+'<circle r="2.8" fill="#f1c75b" stroke="#c9a33a" stroke-width="1"/></g>';
+      s=fl(0,0,1)+fl(-11,9,.7)+fl(11,8,.7)+berry(-5,15,4,'#f2874a','#b5532a')+berry(8,17,3.6,'#f59a58','#b5532a');
+    }
+    break;
+  }
+  return '<g transform="scale('+sc+')">'+s+'</g>';
+}
+
+function plantBody(id,st){
+  const c=PLANTS[id].leaf;
+  let stems=[],leaves=[],tips=[];
+  if(st===1){
+    stems=[[100,166,100,150,3.5]];
+    leaves=[[100,153,-35,15],[100,153,215,15]];
+  }else if(st===2){
+    stems=[[100,166,100,124,4.5]];
+    leaves=[[100,152,-30,27],[100,152,210,27],[100,136,-48,22],[100,136,228,22],[100,124,-90,13]];
+  }else if(st===3){
+    stems=[[100,166,100,96,5.5],[100,138,74,116,3.5],[100,126,128,106,3.5]];
+    leaves=[[100,154,-25,28],[100,154,205,28],[74,116,200,20],[74,116,250,16],[128,106,-20,20],[128,106,-70,16],[100,114,-40,20],[100,114,220,20]];
+    tips=[[100,92,1],[74,112,.8],[128,102,.8]];
+  }else{
+    stems=[[100,166,100,80,6.5],[100,142,64,118,4],[100,132,138,110,4]];
+    leaves=[[100,156,-25,32],[100,156,205,32],[64,118,195,24],[64,118,245,24],[138,110,-15,24],[138,110,-65,24],[100,124,-35,24],[100,124,215,24]];
+    tips=[[100,76,1],[64,114,.85],[138,106,.85]];
+    if(id!=='sunflower'){
+      stems.push([100,112,74,92,3.5],[100,104,128,86,3.5]);
+      leaves.push([74,92,200,20],[74,92,250,20],[128,86,-20,20],[128,86,-70,20],[100,96,-40,20],[100,96,220,20]);
+      tips.push([74,88,.7],[128,82,.7]);
+    }
+  }
+  if(id==='sunflower'&&st===3) tips=[tips[0]];
+  if(id==='sunflower'&&st>=4) tips=[tips[0]];
+  if((id==='lily'||id==='poinsettia')&&st>=4) tips=tips.slice(0,3);
+  let o='';
+  stems.forEach(a=>{o+=stem(a[0],a[1],a[2],a[3],a[4]);});
+  leaves.forEach(a=>{o+=leaf(a[0],a[1],a[2],a[3],c);});
+  if(id==='sunflower'&&st>=3){/* 向日葵加大葉 */ o+=leaf(100,146,-12,34,c)+leaf(100,146,192,34,c);}
+  tips.forEach(t=>{o+='<g transform="translate('+t[0]+' '+t[1]+')">'+decor(id,st,t[2]*(id==='sunflower'?1:1))+'</g>';});
+  return o;
+}
+
+function potSVG(){
+  return '<ellipse cx="100" cy="221" rx="48" ry="4" fill="#7a6458" opacity=".18"/>'+
+    '<g filter="url(#rough)">'+
+    '<path d="M64 178 L136 178 L128 214 Q127 218 123 218 L77 218 Q73 218 72 214 Z" fill="#f4b9a1" stroke="#a96b55" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<rect x="57" y="164" width="86" height="15" rx="6" fill="#f8cdb8" stroke="#a96b55" stroke-width="2.5"/>'+
+    '<path d="M78 192 Q100 200 122 192" stroke="#fff4e6" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>'+
+    '<circle cx="86" cy="205" r="2.5" fill="#fff4e6" opacity=".8"/><circle cx="100" cy="207" r="2.5" fill="#fff4e6" opacity=".8"/><circle cx="114" cy="205" r="2.5" fill="#fff4e6" opacity=".8"/>'+
+    '<ellipse cx="100" cy="166" rx="36" ry="5.5" fill="#8d6a54" stroke="#6b4c3a" stroke-width="2"/></g>';
+}
+
+function plantSVG(id,st,o){
+  o=o||{};
+  const label=PLANTS[id].name+'，階段 '+st+'：'+STAGE_NAMES[st-1]+(o.wilt?'（缺水枯黃）':'');
+  return '<svg viewBox="0 0 200 226" role="img" aria-label="'+esc(label)+'" xmlns="http://www.w3.org/2000/svg">'+
+    potSVG()+
+    '<g class="'+(o.still?'':'sway')+'" style="transform-origin:100px 166px"><g'+(o.wilt?' filter="url(#wilt)"':'')+'><g filter="url(#rough)">'+plantBody(id,st)+'</g></g></g></svg>';
+}
+
+function deadSVG(){
+  return '<svg viewBox="0 0 200 226" role="img" aria-label="植物已枯萎的墓碑" xmlns="http://www.w3.org/2000/svg">'+
+    potSVG()+
+    '<g filter="url(#rough)">'+
+    '<path d="M76 168 L76 122 Q76 98 100 98 Q124 98 124 122 L124 168 Z" fill="#dcd6cc" stroke="#8d867b" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<text x="100" y="128" text-anchor="middle" font-size="17" font-weight="700" fill="#7b746a" font-family="PingFang TC,Noto Sans TC,Microsoft JhengHei,sans-serif">安息</text>'+
+    '<path d="M88 142 L112 142" stroke="#a9a298" stroke-width="2" stroke-linecap="round"/><path d="M90 150 L110 150" stroke="#a9a298" stroke-width="2" stroke-linecap="round"/>'+
+    '<path d="M132 166 Q138 148 146 140 M138 154 Q146 152 150 146 M136 160 Q128 154 126 148" stroke="#9b7b5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
+    '<path d="M64 166 Q60 158 56 160 M62 166 Q66 156 70 158" stroke="#a89a6a" stroke-width="2" fill="none" stroke-linecap="round"/>'+
+    '</g></svg>';
+}
+
+/* ================= 主畫面 ================= */
+function plantCardHTML(p){
+  const h=healthOf(p), meta=PLANTS[p.plantId], st=stageOf(p), g=p.growthPoints;
+  const fig=h==='DEAD'?deadSVG():plantSVG(p.plantId,st,{wilt:h==='THIRSTY'});
+  const badge={HEALTHY:['健康 🌿',''],THIRSTY:['口渴了 🍂','thirsty'],DEAD:['已枯萎 🪦','dead'],MATURE:['已成熟 🌸','mature']}[h];
+  const nick=p.nickname&&p.nickname!==meta.name?'「'+esc(p.nickname)+'」':'';
+  const inv=S.fertilizerInventory;
+  let hint='';
+  if(h==='THIRSTY'){
+    const m=missedDays(p);
+    hint='<div class="hint warn">🍂 口渴了，今天澆水就能恢復健康。'+(m>=2?'<br>今天再不澆水，過午夜就會枯萎！':'<br>若再連續 2 天（含今天）都沒澆水，就會枯萎。')+'</div>';
+  }else if(h==='HEALTHY'&&st===4&&g>=MATURE_POINTS&&p.fertilizedCount<MATURE_FERT){
+    hint='<div class="hint">🌷 '+g+'/'+MATURE_POINTS+'，即將綻放，但尚缺養分！請繼續打卡並施肥（目前 '+p.fertilizedCount+'/'+MATURE_FERT+' 次）</div>';
+  }else if(h==='THIRSTY'){hint='';}
+  if(h==='THIRSTY'&&st===4&&g>=MATURE_POINTS&&p.fertilizedCount<MATURE_FERT){
+    hint+='<div class="hint">🌷 '+g+'/'+MATURE_POINTS+'，但尚缺養分！請施肥（目前 '+p.fertilizedCount+'/'+MATURE_FERT+' 次）</div>';
+  }
+  if(h==='DEAD') hint='<div class="hint bad">🪦 這株植物沒能撐過來……死亡的植物不會計入圖鑑。</div>';
+  const pips=[];for(let i=0;i<DROPS_PER_BAG;i++) pips.push('<b class="'+(i<inv.progressDrops?'on':'')+'"></b>');
+  const canFert=p.status==='GROWING'&&inv.availableBags>0&&h!=='DEAD';
+  const stageLine=h==='DEAD'?'':'階段：Stage '+st+'（'+STAGE_NAMES[st-1]+'） ｜ 成長值：'+g+'/'+MATURE_POINTS;
+  return '<section class="card" aria-label="目前植物">'+
+    '<div class="figure">'+fig+'<span class="badge '+badge[1]+'">'+badge[0]+'</span></div>'+
+    '<div class="plantname">'+meta.emoji+' 正在種植：'+meta.name+nick+'</div>'+
+    (stageLine?'<div class="sub">'+stageLine+'</div>':'')+
+    '<div class="sub">施肥紀錄：已施肥 '+p.fertilizedCount+' 次（晉級需 '+MATURE_FERT+' 次）</div>'+
+    '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+MATURE_POINTS+'" aria-valuenow="'+Math.min(g,MATURE_POINTS)+'" aria-label="成長值"><i style="width:'+Math.min(100,g/MATURE_POINTS*100)+'%"></i></div>'+
+    hint+
+    '<div class="ferti"><div class="info">🧴 肥料庫存：<b>'+inv.availableBags+'</b> 包<br><span class="note">進度 '+inv.progressDrops+'/'+DROPS_PER_BAG+' 滴</span><div class="pips" aria-hidden="true">'+pips.join('')+'</div></div>'+
+    '<button class="btn green" data-act="fertilize" '+(canFert?'':'disabled')+' aria-label="施肥，消耗 1 包肥料，成長值加 3">施肥（-1 包）</button></div>'+
+    '</section>';
+}
+
+function actionsHTML(p){
+  const h=healthOf(p);
+  if(h==='DEAD'){
+    return '<section class="card center"><h2 style="margin:0 0 6px;font-size:17px">花盆裡只剩下墓碑</h2><p class="note">清理後會重新抽一顆新種子，肥料庫存會保留。</p>'+
+      '<button class="btn pink block" data-act="clean" aria-label="清理花盆並重新抽種子">🧹 植物已枯萎，請清理花盆</button></section>';
+  }
+  if(h==='MATURE'){
+    return '<section class="card center"><h2 style="margin:0 0 6px;font-size:17px">🎉 這株植物已經成熟了！</h2><p class="note">已加入圖鑑，任務與打卡到此結束。</p>'+
+      '<button class="btn green block" data-act="collect" aria-label="收下成熟植物並種下一株">🌱 收下並種下一株</button></section>';
+  }
+  const rec=S.todayRecord, cnt=rec.waterCount, full=cnt>=DAILY_CAP;
+  const rows=p.tasks.map(t=>{
+    const done=rec.completedTaskIds.includes(t.id);
+    return '<div class="task'+(done?' done':'')+'"><span class="chk" aria-hidden="true">'+(done?'✓':'')+'</span><span class="txt">'+esc(t.text)+'</span>'+
+      (done?'<span class="done-tag">已澆水</span>':'<button class="btn small blue" data-act="water" data-id="'+esc(t.id)+'" '+(full?'disabled':'')+' aria-label="澆水：'+esc(t.text)+'">💧 澆水</button>')+'</div>';
+  }).join('');
+  let drops='';for(let i=0;i<DAILY_CAP;i++) drops+=i<cnt?'💧':'▫️';
+  return '<section class="card panel" aria-label="今日任務"><h2><span>今日進度：'+cnt+'/'+DAILY_CAP+' 滴水</span><span class="drops" aria-hidden="true">'+drops+'</span></h2>'+rows+
+    (full?'<div class="full">今日水分已飽和，明天再來！</div>':'')+
+    '<div class="lock">🔒 當前植物養成中，5 項任務已鎖定</div></section>';
+}
+
+function emptyHTML(){
+  return '<section class="card center"><div style="font-size:54px">🪴</div><h2 style="margin:4px 0">花盆是空的</h2><p class="note">抽一顆種子，開始新的專注旅程吧。</p>'+
+    '<button class="btn green" data-act="startSetup">🌰 抽種子</button></section>';
+}
+
+function render(){
+  const p=S.currentPlant;
+  $('#app').innerHTML=p?plantCardHTML(p)+actionsHTML(p):emptyHTML();
+}
+
+/* ================= 特效 ================= */
+function toast(msg){
+  const box=$('#toast');
+  const d=document.createElement('div');d.textContent=msg;box.appendChild(d);
+  setTimeout(()=>{if(d.parentNode)d.parentNode.removeChild(d);},3200);
+  while(box.children.length>3) box.removeChild(box.firstChild);
+}
+function dropAnim(){
+  if(reduceMotion()) return;
+  const f=document.querySelector('.figure');if(!f) return;
+  for(let i=0;i<3;i++){
+    const s=document.createElement('span');s.className='drop';s.textContent='💧';
+    s.style.left=(34+i*16+Math.random()*6)+'%';s.style.animationDelay=(i*0.15)+'s';
+    f.appendChild(s);setTimeout(()=>{if(s.parentNode)s.parentNode.removeChild(s);},1500);
+  }
+}
+function confetti(){
+  if(reduceMotion()) return;
+  const box=$('#confetti');const cols=['#f7bcae','#a9d58f','#f8e29f','#bfe2ee','#d9b8e8'];
+  for(let i=0;i<48;i++){
+    const e=document.createElement('i');
+    e.style.left=Math.random()*100+'%';e.style.background=cols[i%cols.length];
+    e.style.animationDuration=(2+Math.random()*2)+'s';e.style.animationDelay=(Math.random()*.6)+'s';
+    box.appendChild(e);
+  }
+  setTimeout(()=>{box.innerHTML='';},5000);
+}
+
+/* ================= Modal ================= */
+let modal=null;
+function openModal(inner,opts){
+  opts=opts||{};
+  const last=modal?modal.last:document.activeElement;
+  closeModal(true);
+  const dismiss=opts.dismissable!==false;
+  const root=$('#modalRoot');
+  root.innerHTML='<div class="overlay" data-overlay><div class="modal card" role="dialog" aria-modal="true" aria-labelledby="mTitle" tabindex="-1">'+
+    (dismiss?'<button class="x" data-m="close" aria-label="關閉">✕</button>':'')+inner+'</div></div>';
+  modal={dismissable:dismiss,onClose:opts.onClose||null,last:last};
+  const m=root.querySelector('.modal');
+  const f=m.querySelector('input')||m.querySelector('.btn:not([disabled])')||m;
+  f.focus();
+  document.body.classList.add('noscroll');
+}
+function closeModal(silent){
+  if(!modal) return;
+  const info=modal;modal=null;
+  $('#modalRoot').innerHTML='';
+  document.body.classList.remove('noscroll');
+  if(info.last&&info.last.focus&&document.contains(info.last)){try{info.last.focus();}catch(e){}}
+  if(!silent&&info.onClose) info.onClose();
+}
+document.addEventListener('keydown',e=>{
+  if(!modal) return;
+  if(e.key==='Escape'&&modal.dismissable){e.preventDefault();closeModal();return;}
+  if(e.key==='Tab'){
+    const m=$('#modalRoot .modal');if(!m) return;
+    const list=[].filter.call(m.querySelectorAll('button,input,[href]'),el=>!el.disabled&&el.offsetParent!==null);
+    if(!list.length){e.preventDefault();return;}
+    const first=list[0],lastEl=list[list.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();lastEl.focus();}
+    else if(!e.shiftKey&&document.activeElement===lastEl){e.preventDefault();first.focus();}
+    else if(!m.contains(document.activeElement)){e.preventDefault();first.focus();}
+  }
+});
+
+/* ---- 成熟慶祝 ---- */
+function showMature(first,showAll){
+  const p=S.currentPlant,meta=PLANTS[p.plantId];
+  const html='<h2 id="mTitle">🎉 恭喜成熟！</h2><div class="big-fig">'+plantSVG(p.plantId,5,{still:true})+'</div>'+
+    '<p class="center"><b>'+meta.emoji+' '+esc(p.nickname)+'</b> 已經盛開了！</p>'+
+    '<p class="center note">'+(first?'✨ 新解鎖：'+meta.name+' 已加入圖鑑':'這個品種已在圖鑑中')+'</p>'+
+    '<div class="row"><button class="btn green" data-m="close">太棒了</button></div>';
+  openModal(html,{onClose:()=>{if(showAll) showAllCollected();}});
+  confetti();
+}
+function showAllCollected(){
+  let row='';IDS.forEach(k=>{row+='<span style="font-size:34px" aria-hidden="true">'+PLANTS[k].emoji+'</span> ';});
+  openModal('<h2 id="mTitle">🏆 全圖鑑通關！</h2><div class="center" style="margin:10px 0">'+row+'</div>'+
+    '<p class="center">你已經集齊 5 款植物，真的太厲害了！</p><p class="center note">之後的種子將從 5 款中完全隨機抽取，繼續享受養成的樂趣吧。</p>'+
+    '<div class="row"><button class="btn yellow" style="background:var(--yellow)" data-m="close">繼續前進</button></div>');
+  confetti();
+}
+
+/* ---- 圖鑑 ---- */
+function showBook(){
+  const cnt=IDS.filter(k=>S.encyclopedia[k].unlocked).length;
+  const items=IDS.map(k=>{
+    const e=S.encyclopedia[k],m=PLANTS[k];
+    return '<div class="item'+(e.unlocked?'':' locked')+'"><div class="fig">'+plantSVG(k,5,{still:true})+(e.unlocked?'':'<div class="q" aria-hidden="true">？</div>')+'</div>'+
+      '<div class="nm">'+(e.unlocked?m.name:'？？？')+'</div><div class="dt">'+(e.unlocked?'解鎖日期：'+e.unlockedAt:'尚未解鎖')+'</div></div>';
+  }).join('');
+  openModal('<h2 id="mTitle">📖 植物圖鑑（'+cnt+'/'+IDS.length+'）</h2><p class="center note">把植物養到成熟（Stage 5）就能解鎖。</p><div class="grid">'+items+'</div>');
+}
+
+/* ---- 備份 ---- */
+let pendingImport=null;
+function showBackup(msg){
+  openModal('<h2 id="mTitle">⚙️ 備份與還原</h2><p class="note">資料只存在這個瀏覽器裡，建議定期匯出備份。</p>'+
+    '<div class="row"><button class="btn green" data-m="export">⬇️ 匯出備份</button><button class="btn blue" data-m="import">⬆️ 匯入備份</button></div>'+
+    '<input type="file" id="fileIn" accept=".json,application/json" hidden>'+
+    '<div class="err" id="backupMsg" role="alert">'+(msg?esc(msg):'')+'</div>');
+}
+function exportData(){
+  try{
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='focus_bonsai_backup_'+dateStr()+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast('✅ 已匯出備份檔');
+  }catch(e){const m=$('#backupMsg');if(m)m.textContent='匯出失敗：'+e.message;}
+}
+function handleFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const data=normalize(JSON.parse(String(r.result)));
+      pendingImport=data;
+      openModal('<h2 id="mTitle">⚠️ 確認匯入</h2><p class="center">將<b>覆蓋現有資料</b>，確定嗎？</p><p class="center note">備份內含 '+IDS.filter(k=>data.encyclopedia[k].unlocked).length+' 款已解鎖植物'+(data.currentPlant?'，目前種植：'+PLANTS[data.currentPlant.plantId].name:'')+'。</p>'+
+        '<div class="row"><button class="btn" data-m="cancelImport">取消</button><button class="btn pink" data-m="confirmImport">確定覆蓋</button></div>');
+    }catch(e){
+      const m=$('#backupMsg');
+      if(m) m.textContent='匯入失敗：'+(e instanceof SyntaxError?'不是有效的 JSON 檔案':e.message);
+    }
+  };
+  r.onerror=()=>{const m=$('#backupMsg');if(m)m.textContent='讀取檔案失敗';};
+  r.readAsText(file);
+}
+
+/* ---- 抽種子流程 ---- */
+let setup=null;
+function startSetup(){
+  const t=S.lastTasks.slice(0,TASK_COUNT);while(t.length<TASK_COUNT)t.push('');
+  setup={step:'draw',plantId:null,nickname:'',tasks:t,drawing:false,error:''};
+  renderSetup();
+}
+function renderSetup(){
+  if(!setup) return;
+  let html='';
+  if(setup.step==='draw'){
+    const id=setup.plantId,m=id?PLANTS[id]:null;
+    const isNew=id&&!S.encyclopedia[id].unlocked;
+    html='<h2 id="mTitle">🌰 抽取你的種子</h2>'+
+      '<div class="seedbox" id="seedbox" aria-live="polite">'+(m?m.emoji:'🌰')+'</div>'+
+      (m?'<div class="pname">'+m.name+'</div><p class="center note">'+(isNew?'✨ 新品種！成熟後就能解鎖圖鑑':'已收錄的品種，再養一次也很棒')+'</p>':
+        '<p class="center note">'+(IDS.every(k=>S.encyclopedia[k].unlocked)?'圖鑑已集滿，這次從 5 款中隨機抽取。':'會優先抽到還沒收錄的植物。')+'</p>')+
+      '<div class="row">'+(m?'<button class="btn green" data-m="toName">下一步：取個名字</button>':'<button class="btn green" data-m="draw">🎲 抽種子</button>')+'</div>';
+  }else if(setup.step==='name'){
+    const m=PLANTS[setup.plantId];
+    html='<h2 id="mTitle">'+m.emoji+' 幫它取個名字</h2><label class="field"><span>植物暱稱（最多 12 字，可留空）</span>'+
+      '<input type="text" id="nick" maxlength="12" placeholder="'+m.name+'" value="'+esc(setup.nickname)+'" autocomplete="off"></label>'+
+      '<div class="row"><button class="btn green" data-m="toTasks">下一步：設定任務</button></div>';
+  }else{
+    let inputs='';
+    for(let i=0;i<TASK_COUNT;i++){
+      inputs+='<label class="field"><span>每日任務 '+(i+1)+'</span><input type="text" class="taskin" data-i="'+i+'" maxlength="30" value="'+esc(setup.tasks[i])+'" placeholder="例如：閱讀 20 分鐘" autocomplete="off"></label>';
+    }
+    html='<h2 id="mTitle">📝 設定 5 個每日任務</h2><p class="note center">'+(S.lastTasks.length?'已帶入上一株的任務，可直接修改。':'請填寫 5 個你想養成的小習慣。')+'<br>⚠️ 種下後，任務會鎖定到這株植物成熟或枯萎為止。</p>'+inputs+
+      '<div class="err" id="setupErr" role="alert">'+esc(setup.error)+'</div><div class="row"><button class="btn green" data-m="start">🌱 開始種植</button></div>';
+  }
+  openModal(html,{dismissable:false});
+}
+function doDraw(){
+  if(!setup||setup.drawing||setup.plantId) return;
+  const locked=IDS.filter(k=>!S.encyclopedia[k].unlocked);
+  const pool=locked.length?locked:IDS;
+  const pick=pool[Math.floor(Math.random()*pool.length)];
+  const finish=()=>{if(!setup)return;setup.plantId=pick;setup.drawing=false;renderSetup();};
+  if(reduceMotion()){finish();return;}
+  setup.drawing=true;
+  const box=$('#seedbox'),btn=document.querySelector('[data-m="draw"]');
+  if(btn) btn.disabled=true;
+  if(box) box.classList.add('shake');
+  let n=0;
+  const iv=setInterval(()=>{
+    if(box) box.textContent=PLANTS[IDS[n++%IDS.length]].emoji;
+    if(n>12){clearInterval(iv);finish();}
+  },100);
+}
+function startPlanting(){
+  const tasks=setup.tasks.map(t=>t.trim());
+  if(tasks.some(t=>!t)){setup.error='5 個任務都要填寫喔';const e=$('#setupErr');if(e)e.textContent=setup.error;return;}
+  const today=dateStr();
+  const meta=PLANTS[setup.plantId];
+  S.currentPlant={
+    plantId:setup.plantId, nickname:setup.nickname.trim()||meta.name, plantedDate:today,
+    growthPoints:0, wateringCount:0, fertilizedCount:0, lastWateredDate:today, status:'GROWING',
+    tasks:tasks.map((t,i)=>({id:'t'+(i+1),text:t}))
+  };
+  S.lastTasks=tasks.slice();
+  S.todayRecord.dateString=today;
+  S.todayRecord.completedTaskIds=[];
+  setup=null;
+  save();closeModal(true);render();
+  toast('🌱 種下了 '+meta.name+'，加油！');
+}
+
+/* ================= 事件 ================= */
+$('#btnBook').addEventListener('click',showBook);
+$('#btnBackup').addEventListener('click',()=>showBackup());
+
+$('#app').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||b.disabled) return;
+  const a=b.getAttribute('data-act');
+  if(a==='water') water(b.getAttribute('data-id'));
+  else if(a==='fertilize') fertilize();
+  else if(a==='clean'||a==='collect') leavePlant();
+  else if(a==='startSetup') startSetup();
+});
+
+const mr=$('#modalRoot');
+mr.addEventListener('click',e=>{
+  if(e.target.hasAttribute('data-overlay')){if(modal&&modal.dismissable)closeModal();return;}
+  const b=e.target.closest('[data-m]');if(!b||b.disabled) return;
+  switch(b.getAttribute('data-m')){
+    case 'close': closeModal(); break;
+    case 'draw': doDraw(); break;
+    case 'toName': setup.step='name'; renderSetup(); break;
+    case 'toTasks': setup.step='tasks'; renderSetup(); break;
+    case 'start': startPlanting(); break;
+    case 'export': exportData(); break;
+    case 'import': {const f=$('#fileIn');if(f)f.click();break;}
+    case 'cancelImport': pendingImport=null; showBackup(); break;
+    case 'confirmImport':
+      if(pendingImport){
+        S=pendingImport;pendingImport=null;save();closeModal(true);tick();render();
+        toast('✅ 已匯入備份');
+        if(!S.currentPlant) startSetup();
+      }
+      break;
+  }
+});
+mr.addEventListener('change',e=>{
+  if(e.target.id==='fileIn'){handleFile(e.target.files&&e.target.files[0]);e.target.value='';}
+});
+mr.addEventListener('input',e=>{
+  if(!setup) return;
+  if(e.target.id==='nick') setup.nickname=e.target.value;
+  else if(e.target.classList.contains('taskin')) setup.tasks[Number(e.target.getAttribute('data-i'))]=e.target.value;
+});
+mr.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='nick'){e.preventDefault();setup.step='tasks';renderSetup();}
+});
+
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tick()) render();});
+window.addEventListener('focus',()=>{if(tick()) render();});
+setInterval(()=>{if(tick()) render();},60000);
+
+/* ================= 啟動 ================= */
+S=load();
+tick();
+render();
+if(startupToast) toast(startupToast);
+if(!S.currentPlant) startSetup();
+
+/* 測試用掛鉤（不影響使用） */
+window.__bonsai={get state(){return S;},tick,water,fertilize,stageOf,healthOf,normalize,render};
+})();
+</script>
+</body>
+</html>
